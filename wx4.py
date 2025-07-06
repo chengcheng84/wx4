@@ -120,7 +120,7 @@ class WeChat:
         NoMore = 0
         while True:
             BeforeFirst = self.B_MsgList.GetFirstChildControl().GetRuntimeId()
-            self.B_MsgList.WheelUp(wheelTimes=3, waitTime=random.random())
+            self.B_MsgList.WheelUp(wheelTimes=3, waitTime=random.random()*10)
             if BeforeFirst == self.B_MsgList.GetFirstChildControl().GetRuntimeId():
                 NoMore += 1
                 if NoMore > 3:
@@ -140,7 +140,7 @@ class WeChat:
         Returns:
             list: 所有好友列表
         """
-        pass
+        return NotImplementedError("GetAllFriends无法使用")
 
     def Getnewmessage(self) -> None:
         # 监听新消息
@@ -225,7 +225,7 @@ class WeChat:
             t0 = time.time()
             while True:
                 if time.time() - t0 > 10:
-                    raise TimeoutError(
+                    self.logger.error(
                         f"发送消息超时 --> {self.MsgEditorBox.Name} - {msg}"
                     )
                 SetClipboardText(msg)
@@ -235,7 +235,17 @@ class WeChat:
         if send:
             self.MsgEditorBox.SendKeys("{Enter}")
 
-
+    def GetWeiXinID(self, index=-1):
+        MsgControl = self.B_MsgList.GetChildren()[index]
+        rect = MsgControl.BoundingRectangle
+        left = rect.left
+        top = rect.top
+        pyautogui.click(left+40,top+30)
+        automation_id = "right_v_view.user_info_center_view.basic_line_view.ContactProfileTextView"
+        time.sleep(0.5)
+        weixin = uia.WindowControl(Name="Weixin")
+        WeiXinId = weixin.TextControl(AutomationId=automation_id,ClassName="mmui::ContactProfileTextView").GetParentControl().GetParentControl().GetChildren()[1].GetChildren()[-1].Name
+        return WeiXinId
 if __name__ == "__main__":
     wx = WeChat()
-    wx.SendMsg("Helllo")
+    wx.SendMsg("Hello")
