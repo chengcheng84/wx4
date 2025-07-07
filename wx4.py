@@ -36,6 +36,7 @@ class WeChat:
         self.MsgEditorBox = self.WXwindow.EditControl(AutomationId="chat_input_field")
         self.SaveTo = 0
         self.InitGetAllMessage()
+        self.TheLastRuntimeID = ""
 
         # GetNewMsgThread = threading.Thread(target=self._getnewmessage, daemon=True)
         # GetNewMsgThread.start()
@@ -120,7 +121,7 @@ class WeChat:
         NoMore = 0
         while True:
             BeforeFirst = self.B_MsgList.GetFirstChildControl().GetRuntimeId()
-            self.B_MsgList.WheelUp(wheelTimes=3, waitTime=random.random()*10)
+            self.B_MsgList.WheelUp(wheelTimes=30, waitTime=random.random())
             if BeforeFirst == self.B_MsgList.GetFirstChildControl().GetRuntimeId():
                 NoMore += 1
                 if NoMore > 3:
@@ -144,11 +145,9 @@ class WeChat:
 
     def Getnewmessage(self) -> None:
         # 监听新消息
-        global logger
-        logger.info("开始监听新消息")
-
+        self.logger.info("开始监听新消息")
         LastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
-        if LastRuntimeID not in self.Runtimes_Msg:
+        if LastRuntimeID != self.TheLastRuntimeID:
             self.Runtimes_Msg.append(LastRuntimeID)
             control = self.B_MsgList.GetLastChildControl()
             sender: str = GetSender(control)
@@ -156,9 +155,9 @@ class WeChat:
                 control.Name,
                 sender,
             ]
-            time.sleep(self.possible_fastest_message_sending_speed)
+            self.TheLastRuntimeID = LastRuntimeID
         else:
-            time.sleep(0.5)  # 防止CPU占用过高
+            time.sleep(self.possible_fastest_message_sending_speed)
 
     def _checkversion(self):
         pass
