@@ -1,10 +1,12 @@
-import uiautomation as uia
-from .utils import *
-import random
+import os
 import time
-from loguru import logger
+import random
 from pathlib import Path
 
+import uiautomation as uia
+from loguru import logger
+
+from .utils import *
 
 class WeChat:
     VERSION: str = "4.x"
@@ -17,7 +19,11 @@ class WeChat:
         # 日志
         self.logger = logger
         self.logger.remove()
-        self.logger.add(os.getenv("Logs"))
+        if os.getenv("Logs") is None:
+            self.logger.add(os.path.join(".", "wx.log"))
+            print(f"日志将保存到{os.path.join(".", "wx.log")},使用Logs环境变量修改")
+        else:
+            self.logger.add(os.getenv("Logs"))
         # 清理缓存
         folder = Path("wxdata") / "cache"
         for file in folder.iterdir():
@@ -245,6 +251,3 @@ class WeChat:
         weixin = uia.WindowControl(Name="Weixin")
         WeiXinId = weixin.TextControl(AutomationId=automation_id,ClassName="mmui::ContactProfileTextView").GetParentControl().GetParentControl().GetChildren()[1].GetChildren()[-1].Name
         return WeiXinId
-if __name__ == "__main__":
-    wx = WeChat()
-    wx.SendMsg("Hello")
