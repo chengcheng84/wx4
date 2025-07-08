@@ -126,6 +126,8 @@ class WeChat:
     def LoadMoreMessage(self) -> None:
         NoMore = 0
         while True:
+            if self.B_MsgList.GetFirstChildControl().GetRuntimeId() is None:
+                break
             BeforeFirst = self.B_MsgList.GetFirstChildControl().GetRuntimeId()
             self.B_MsgList.WheelUp(wheelTimes=30, waitTime=random.random())
             if BeforeFirst == self.B_MsgList.GetFirstChildControl().GetRuntimeId():
