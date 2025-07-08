@@ -1,5 +1,5 @@
 import os.path
-import time
+
 
 import pyperclip
 import pyautogui
@@ -166,3 +166,5 @@ def GetSender(i) -> str:
         sender = ""
     return sender
 
+if __name__ == '__main__':
+    print(merge_lists([1,2], [1,2]))

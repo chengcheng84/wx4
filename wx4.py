@@ -25,8 +25,8 @@ class WeChat:
         else:
             self.logger.add(os.getenv("Logs"))
         # 清理缓存
-        folder = Path("wxdata") / "cache"
-        for file in folder.iterdir():
+        CacheFolder: Path = Path("wxdata") / "cache"
+        for file in CacheFolder.iterdir():
             if file.is_file():
                 file.unlink()
 
@@ -34,15 +34,13 @@ class WeChat:
         self.RuntimeID2Data: dict = {}
         self.Runtimes_Msg: list = []
         self.AllMsgList: list = []
-        self.A_Search = self.WXwindow.EditControl(Name="搜索")
-        self.B_MsgList = self.WXwindow.ListControl(Name="消息")
+        self.A_Search: uia.EditControl = self.WXwindow.EditControl(Name="搜索")
+        self.B_MsgList: uia.ListControl = self.WXwindow.ListControl(Name="消息")
         self.possible_fastest_message_sending_speed = 0.5
-        # MainControl1 = self.WXwindow.GetLastChildControl().GetFirstChildControl().GetFirstChildControl().GetLastChildControl()
-        # self.NavigationBox, self.ChatBox,_  = MainControl1.GetChildren()
         self.MsgEditorBox = self.WXwindow.EditControl(AutomationId="chat_input_field")
         self.SaveTo = 0
+        self.TheLastRuntimeID = None
         self.InitGetAllMessage()
-        self.TheLastRuntimeID = ""
 
         # GetNewMsgThread = threading.Thread(target=self._getnewmessage, daemon=True)
         # GetNewMsgThread.start()
@@ -106,6 +104,7 @@ class WeChat:
             Msg.WheelDown(wheelTimes=3, waitTime=random.random() / 3)
             if len(self.Runtimes_Msg) > self.SaveTo + 4:
                 self.UpdataMsgList()
+        self.TheLastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
 
     def UpdataMsgList(self) -> None:
         # 将Runtimes_Msg中的消息整理为ALlMsgList，并清空Runtimes_Msg
