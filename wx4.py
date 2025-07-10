@@ -8,6 +8,7 @@ from loguru import logger
 
 from .utils import *
 
+
 class WeChat:
     VERSION: str = "4.x"
 
@@ -21,7 +22,7 @@ class WeChat:
         self.logger.remove()
         if os.getenv("Logs") is None:
             self.logger.add(os.path.join(".", "wx.log"))
-            print(f"日志将保存到{os.path.join(".", "wx.log")},使用Logs环境变量修改")
+            print(f"日志将保存到{os.path.join('.', 'wx.log')},使用Logs环境变量修改")
         else:
             self.logger.add(os.getenv("Logs"))
         # 清理缓存
@@ -88,7 +89,7 @@ class WeChat:
             BeforeFirst = Msg.GetFirstChildControl().GetRuntimeId()
             if BeforeFirst == Msg.GetFirstChildControl().GetRuntimeId():
                 NoMore += 1
-                if NoMore > 10:  # 确保没有更多消息
+                if NoMore > 2:  # 确保没有更多消息
                     break
             else:
                 NoMore = 0
@@ -246,9 +247,20 @@ class WeChat:
         rect = MsgControl.BoundingRectangle
         left = rect.left
         top = rect.top
-        pyautogui.click(left+40,top+30)
-        automation_id = "right_v_view.user_info_center_view.basic_line_view.ContactProfileTextView"
+        pyautogui.click(left + 40, top + 30)
+        automation_id = (
+            "right_v_view.user_info_center_view.basic_line_view.ContactProfileTextView"
+        )
         time.sleep(0.5)
         weixin = uia.WindowControl(Name="Weixin")
-        WeiXinId = weixin.TextControl(AutomationId=automation_id,ClassName="mmui::ContactProfileTextView").GetParentControl().GetParentControl().GetChildren()[1].GetChildren()[-1].Name
+        WeiXinId = (
+            weixin.TextControl(
+                AutomationId=automation_id, ClassName="mmui::ContactProfileTextView"
+            )
+            .GetParentControl()
+            .GetParentControl()
+            .GetChildren()[1]
+            .GetChildren()[-1]
+            .Name
+        )
         return WeiXinId
