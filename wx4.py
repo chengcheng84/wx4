@@ -151,7 +151,7 @@ class WeChat:
         """
         return NotImplementedError("GetAllFriends无法使用")
 
-    def Getnewmessage(self) -> None:
+    def get_new_message(self) -> None:
         # 监听新消息
         self.logger.info("开始监听新消息")
         LastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
