@@ -71,7 +71,7 @@ class WeChat:
     #     readto: int = 0,
     # ) -> list:
 
-    def InitGetAllMessage(self) -> list:
+    def InitGetAllMessage(self) -> None:
         """
         # To Fix
         获取所有消息的时候,RuntimeID可能重复，导致错误
