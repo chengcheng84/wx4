@@ -5,8 +5,12 @@ from pathlib import Path
 
 import uiautomation as uia
 from loguru import logger
+from dotenv import load_dotenv
 
 from .utils import *
+
+if load_dotenv(dotenv_path=".env") is None:
+    exit(1)
 
 
 class WeChat:

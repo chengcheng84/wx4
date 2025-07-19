@@ -6,7 +6,11 @@ import pyautogui
 import uiautomation as uia
 from PIL import Image, ImageFile
 from loguru import logger
+from dotenv import load_dotenv
 
+
+if load_dotenv(dotenv_path=".env") is None:
+    exit(1)
 logger.add(os.getenv("Logs"))
 
 
@@ -166,5 +170,6 @@ def GetSender(i) -> str:
         sender = ""
     return sender
 
-if __name__ == '__main__':
-    print(merge_lists([1,2], [1,2]))
+
+if __name__ == "__main__":
+    print(merge_lists([1, 2], [1, 2]))
