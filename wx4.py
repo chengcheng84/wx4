@@ -93,7 +93,7 @@ class WeChat:
             BeforeFirst = Msg.GetFirstChildControl().GetRuntimeId()
             if BeforeFirst == Msg.GetFirstChildControl().GetRuntimeId():
                 NoMore += 1
-                if NoMore > 2:  # 确保没有更多消息
+                if NoMore > 10:  # 确保没有更多消息
                     break
             else:
                 NoMore = 0
