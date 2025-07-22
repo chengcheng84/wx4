@@ -163,6 +163,7 @@ class WeChat:
             self.Runtimes_Msg.append(LastRuntimeID)
             control = self.B_MsgList.GetLastChildControl()
             sender: str = GetSender(control)
+
             self.RuntimeID2Data[str(control.GetRuntimeId())] = [
                 control.Name,
                 sender,

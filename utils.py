@@ -1,5 +1,5 @@
 import os.path
-
+import re
 
 import pyperclip
 import pyautogui
@@ -14,6 +14,23 @@ if load_dotenv(dotenv_path=".env") is None:
 logger.add(os.getenv("Logs"))
 
 
+def voice_msg_processor(msg_content) -> None | dict[str, str | int]:
+    """处理音频消息
+    Args:
+        msg_content(str):消息的内容
+    """
+    msg = msg_content
+    pattern = r'"语言(\d+)秒"(.*)'
+    match = re.search(pattern, msg)
+    if match:
+        if (match.group(1) is None) or (match.group(2) is None):
+            return None
+        else:
+            return {"time": match.group(1), "msg": match.group(2)}
+    else:
+        return None
+
+
 def SetClipboardText(text: str):
     pyperclip.copy(text)
 
@@ -23,10 +40,18 @@ class MSG:
     wx的消息
     """
 
-    def __init__(self, index: int, sender: str, content: str) -> None:
+    def __init__(
+        self, index: int, sender: str, content: str, auto_process_voice_msg: bool = True
+    ) -> None:
         self.sender = sender
         self.content = content
         self.index = index
+        if not auto_process_voice_msg:
+            return
+        voice_msg = voice_msg_processor(self.content)
+        if voice_msg_processor(self.content) is not None:
+            self.time: int = voice_msg["time"]
+            self.content: str = voice_msg["content"]
 
     def __str__(self):
         return f"MSG(index={self.index}, sender={self.sender}, content={self.content})"
@@ -38,6 +63,9 @@ class MSG:
 def merge_lists(a: list, b: list) -> list:
     """
     合并两个列表,去除重复部分
+    Args:
+        a(list):第一个列表
+        b(list):第二个列表
     Example:
         ```
         merge_lists([1,2,3,4,5],[3,4,5,6,7,8])
