@@ -4,14 +4,15 @@ import re
 import pyperclip
 import pyautogui
 import uiautomation as uia
-from PIL import Image, ImageFile
+from PIL import Image, ImageFile, UnidentifiedImageError
 from loguru import logger
 from dotenv import load_dotenv
 
-
-if load_dotenv(dotenv_path=".env") is None:
-    exit(1)
-logger.add(os.getenv("Logs"))
+if load_dotenv(dotenv_path=".env") is False:
+    exit(0x0001)
+load_dotenv(dotenv_path=".env")
+logger.remove(0)
+logger.add(os.getenv("Logs"), level="INFO")
 
 
 def voice_msg_processor(msg_content) -> None | dict[str, str | int]:
@@ -159,7 +160,11 @@ def image_contains_color(image_path, tolerance=0) -> bool:
     :param tolerance: 颜色容差
     :return: 如果图片中包含目标颜色，返回True，否则返回False
     """
-    image: ImageFile = Image.open(image_path)
+    try:
+        image: ImageFile = Image.open(image_path)
+    except UnidentifiedImageError as e:
+        logger.error(e)
+        return False
     image: ImageFile = image.convert("RGB")
     width, height = image.size
     count: int = 0
