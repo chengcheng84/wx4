@@ -1,9 +1,12 @@
 import os.path
 import re
+import random
+import time
 
 import pyperclip
 import pyautogui
 import uiautomation as uia
+
 from PIL import Image, ImageFile, UnidentifiedImageError
 from loguru import logger
 from dotenv import load_dotenv
@@ -21,7 +24,7 @@ def voice_msg_processor(msg_content) -> None | dict[str, str | int]:
         msg_content(str):消息的内容
     """
     msg = msg_content
-    pattern = r'"语言(\d+)秒"(.*)'
+    pattern = r'"语言(\d+)"秒(.*)'
     match = re.search(pattern, msg)
     if match:
         if (match.group(1) is None) or (match.group(2) is None):
@@ -98,7 +101,7 @@ def merge_lists(a: list, b: list) -> list:
     return merged
 
 
-def capture_control_image(control):
+def capture_control_image(control: uia.Control):
     """
     根据控件对象截取屏幕上的控件图像。
     """
@@ -109,11 +112,11 @@ def capture_control_image(control):
     bottom = rect.bottom
     width = right - left
     height = bottom - top
-    screenshot = pyautogui.screenshot(region=(left, top, width, height))
+    screenshot: Image.Image = pyautogui.screenshot(region=(left, top, width, height))
     return screenshot
 
 
-def is_fully_visible(control):
+def is_fully_visible(control: uia.Control):
     """
     判断控件是否完全可见
     :param control: uiautomation控件对象
@@ -182,27 +185,46 @@ def image_contains_color(image_path, tolerance=0) -> bool:
     return False
 
 
-def GetSender(i) -> str:
-    save_path = f"wxdata\\cache\\{str(i.GetRuntimeId())}.png"
+def GetSender(control) -> str:
+    save_path = f"wxdata\\cache\\{str(control.GetRuntimeId())}.png"
     if (
-        (i.Name != "图片")  # 是图片
-        and (str(i.AutomationId) != "")  # 不是时间
-        and (is_fully_visible(i))  # 控件完全可见
-        and (i.Name != "文件")  # 是文件
+        (control.Name != "图片")  # 是图片
+        and (str(control.AutomationId) != "")  # 不是时间
+        and (is_fully_visible(control))  # 控件完全可见
+        and (control.Name != "文件")  # 是文件
     ):
         if not os.path.exists(save_path):
-            screenshot = capture_control_image(i)
+            screenshot = capture_control_image(control)
             screenshot.save(save_path)
         if image_contains_color(save_path):
             sender = "Self"
         else:
             sender = "Other"
-    elif str(i.AutomationId) == "":
+    elif str(control.AutomationId) == "":
         sender = "SYS"
     else:
         sender = ""
     return sender
 
 
+def wheel_control(
+    control: uia.Control, times: int = 20, wheel_range: list[int] = [300, 400]
+) -> None:
+    """滚轮控制
+    Args:
+        control(uiautomation.Control):要滚动的控件
+        times(int):滚动的分的次数
+        wheel_range(list):随机范围，例如[300, 400]
+    """
+    time_list = [random.random() for _ in range(times)]
+    control.SetFocus(True)
+    for i in range(times):
+        pyautogui.scroll(
+            clicks=random.randint(wheel_range[0] / times, wheel_range[1] / times)
+        )
+        time.sleep(time_list[i])
+
+
+# 按 Ctrl + Shift + P 打开命令面板，输入 settings 并选择 Preferences: Open Settings (UI)。然后搜索 IntelliSense
 if __name__ == "__main__":
     print(merge_lists([1, 2], [1, 2]))

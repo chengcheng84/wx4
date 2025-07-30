@@ -6,8 +6,10 @@ from pathlib import Path
 import uiautomation as uia
 from loguru import logger
 from dotenv import load_dotenv
+import pyautogui
 
 from .utils import *
+from wx.anti_detection import anti_detection_start
 
 if load_dotenv(dotenv_path=".env") is None:
     exit(1)
@@ -106,7 +108,7 @@ class WeChat:
             self.Runtimes_Msg = merge_lists(
                 self.Runtimes_Msg, IntheViewContralAllRuntimeID
             )
-            Msg.WheelDown(wheelTimes=3, waitTime=random.random() / 3)
+            wheel_control(Msg)
             if len(self.Runtimes_Msg) > self.SaveTo + 4:
                 self.UpdataMsgList()
         self.TheLastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
@@ -133,7 +135,7 @@ class WeChat:
             if self.B_MsgList.GetFirstChildControl().GetRuntimeId() is None:
                 break
             BeforeFirst = self.B_MsgList.GetFirstChildControl().GetRuntimeId()
-            self.B_MsgList.WheelUp(wheelTimes=30, waitTime=random.random())
+            wheel_control(self.B_MsgList, wheel_range=[2900, 3000])
             if BeforeFirst == self.B_MsgList.GetFirstChildControl().GetRuntimeId():
                 NoMore += 1
                 if NoMore > 3:
@@ -170,6 +172,8 @@ class WeChat:
             self.TheLastRuntimeID = LastRuntimeID
         else:
             time.sleep(self.possible_fastest_message_sending_speed)
+        if random.randint(0, 50) == 20:
+            anti_detection_start("000000")
 
     def _checkversion(self):
         pass
@@ -244,6 +248,7 @@ class WeChat:
                 if self.MsgEditorBox.GetValuePattern().Value:
                     break
         if send:
+            time.sleep(random.random())  # anti detection
             self.MsgEditorBox.SendKeys("{Enter}")
 
     def GetWeiXinID(self, index=-1):
