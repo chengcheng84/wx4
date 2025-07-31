@@ -16,7 +16,7 @@
 ### 前提条件
 
 - Python 3.12+
-- 微信桌面客户端4.x版本
+- 微信桌面客户端4.x版本(不可以使用4.0.6+)
 - Windows操作系统
 
 ### 安装步骤
@@ -29,11 +29,6 @@ pip install uiautomation pyperclip pyautogui pillow loguru
 ```
 
 3. 确保微信桌面客户端已安装并能正常登录
-
-4. 创建日志目录（可选）
-```bash
-mkdir logs
-```
 
 ## 使用示例
 
