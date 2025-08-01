@@ -12,6 +12,7 @@ from loguru import logger
 from dotenv import load_dotenv
 
 if load_dotenv(dotenv_path=".env") is False:
+    print("Error to load")
     exit(0x0001)
 load_dotenv(dotenv_path=".env")
 logger.remove(0)
@@ -208,7 +209,7 @@ def GetSender(control) -> str:
 
 
 def wheel_control(
-    control: uia.Control, times: int = 20, wheel_range: list[int] = [300, 400]
+    control: uia.Control, times: int = 1, wheel_range: list[int] = [300, 400]
 ) -> None:
     """滚轮控制
     Args:
@@ -217,10 +218,12 @@ def wheel_control(
         wheel_range(list):随机范围，例如[300, 400]
     """
     time_list = [random.random() for _ in range(times)]
-    control.SetFocus(True)
+    control.SetFocus()
     for i in range(times):
         pyautogui.scroll(
-            clicks=random.randint(wheel_range[0] / times, wheel_range[1] / times)
+            clicks=random.randint(
+                int(wheel_range[0] / times), int(wheel_range[1] / times)
+            )
         )
         time.sleep(time_list[i])
 

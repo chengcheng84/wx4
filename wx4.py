@@ -10,8 +10,10 @@ import pyautogui
 
 from .utils import *
 from wx.anti_detection import anti_detection_start
+import copy
 
 if load_dotenv(dotenv_path=".env") is None:
+    print("Error to load env")
     exit(1)
 
 
@@ -100,15 +102,19 @@ class WeChat:
             else:
                 NoMore = 0
             IntheViewContralAllRuntimeID: list = []
-            for i in Msg.GetChildren():
+            msg_children = Msg.GetChildren()
+            if NoMore < 8:
+                msg_children = msg_children[:-1]
+            for i in msg_children:
                 sender: str = ""
+                time.sleep(0.1)
                 sender = GetSender(i)
                 IntheViewContralAllRuntimeID.append(i.GetRuntimeId())
                 self.RuntimeID2Data[str(i.GetRuntimeId())] = [i.Name, sender]
             self.Runtimes_Msg = merge_lists(
                 self.Runtimes_Msg, IntheViewContralAllRuntimeID
             )
-            wheel_control(Msg)
+            wheel_control(Msg, wheel_range=[-1500, -1000])
             if len(self.Runtimes_Msg) > self.SaveTo + 4:
                 self.UpdataMsgList()
         self.TheLastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
@@ -173,7 +179,8 @@ class WeChat:
         else:
             time.sleep(self.possible_fastest_message_sending_speed)
         if random.randint(0, 50) == 20:
-            anti_detection_start("000000")
+            # anti_detection_start("000000")
+            pass
 
     def _checkversion(self):
         pass
