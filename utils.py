@@ -8,15 +8,15 @@ import pyautogui
 import uiautomation as uia
 
 from PIL import Image, ImageFile, UnidentifiedImageError
-from loguru import logger
 from dotenv import load_dotenv
+from utils import get_logger
 
 if load_dotenv(dotenv_path=".env") is False:
     print("Error to load")
     exit(0x0001)
 load_dotenv(dotenv_path=".env")
-logger.remove(0)
-logger.add(os.getenv("Logs"), level="INFO")
+
+logger = get_logger()
 
 
 def voice_msg_processor(msg_content) -> None | dict[str, str | int]:

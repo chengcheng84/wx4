@@ -44,7 +44,7 @@ class WeChat:
         self.SaveTo = 0
         self.TheLastRuntimeID = None
         if chat_with is not None:
-            self.ChatWith(chat_with)
+            print(self.ChatWith(chat_with))
         if init_msglist:
             self.InitGetAllMessage()
 
@@ -59,7 +59,8 @@ class WeChat:
             contact_name:联系人的名字
         """
         for i, contact in enumerate(self.A_contacts.GetChildren()):
-            if str(contact.Name).split(" ") == contact_name:
+            print(str(contact.Name).split(" "), contact_name)
+            if str(contact.Name).split(" ")[0] == contact_name:
                 contact.Click()
                 return (contact.Name, i)
         return (None, None)
@@ -93,6 +94,7 @@ class WeChat:
         2. 在每4个控件就生成MSG对象防止RuntimeID重复
         3. 获取每个控件的发送者（Bug, can't run）
         """
+        self.move_to_msglist()
         self.LoadMoreMessage()
         self.logger.info("开始获取所有消息")
         Msg = self.B_MsgList
