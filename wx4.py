@@ -1,16 +1,15 @@
-import os
 import time
 import random
 from pathlib import Path
 
 import uiautomation as uia
-from loguru import logger
 from dotenv import load_dotenv
 import pyautogui
 
+from utils.utils import get_logger
 from .utils import *
-from wx.anti_detection import anti_detection_start
-import copy
+# from wx.anti_detection import anti_detection_start
+
 
 if load_dotenv(dotenv_path=".env") is None:
     print("Error to load env")
@@ -20,19 +19,13 @@ if load_dotenv(dotenv_path=".env") is None:
 class WeChat:
     VERSION: str = "4.x"
 
-    def __init__(self) -> None:
+    def __init__(self, init_msglist: bool = True, chat_with: str | None = None) -> None:
         """微信UI自动化实例"""
         self.WXwindow: uia.WindowControl = uia.WindowControl(searchDepth=3, Name="微信")
         if not self.WXwindow.Exists(0.1):
             uia.SendKeys("{Ctrl}{Alt}w")
         # 日志
-        self.logger = logger
-        self.logger.remove()
-        if os.getenv("Logs") is None:
-            self.logger.add(os.path.join(".", "wx.log"))
-            print(f"日志将保存到{os.path.join('.', 'wx.log')},使用Logs环境变量修改")
-        else:
-            self.logger.add(os.getenv("Logs"))
+        self.logger = get_logger()
         # 清理缓存
         CacheFolder: Path = Path("wxdata") / "cache"
         for file in CacheFolder.iterdir():
@@ -45,19 +38,31 @@ class WeChat:
         self.AllMsgList: list = []
         self.A_Search: uia.EditControl = self.WXwindow.EditControl(Name="搜索")
         self.B_MsgList: uia.ListControl = self.WXwindow.ListControl(Name="消息")
+        self.A_contacts: uia.ListControl = self.WXwindow.ListControl(Name="会话")
         self.possible_fastest_message_sending_speed = 0.5
         self.MsgEditorBox = self.WXwindow.EditControl(AutomationId="chat_input_field")
         self.SaveTo = 0
         self.TheLastRuntimeID = None
-        self.InitGetAllMessage()
-
-        # GetNewMsgThread = threading.Thread(target=self._getnewmessage, daemon=True)
-        # GetNewMsgThread.start()
+        if chat_with is not None:
+            self.ChatWith(chat_with)
+        if init_msglist:
+            self.InitGetAllMessage()
 
     def send_enter(self) -> None:
         """按下回车键"""
         editbox = self.MsgEditorBox
         editbox.SendKeys("{ENTER}")
+
+    def ChatWith(self, contact_name: str) -> tuple[str, int] | tuple[None, None]:
+        """切换聊天列表
+        Args:
+            contact_name:联系人的名字
+        """
+        for i, contact in enumerate(self.A_contacts.GetChildren()):
+            if str(contact.Name).split(" ") == contact_name:
+                contact.Click()
+                return (contact.Name, i)
+        return (None, None)
 
     def SendFiles(self, filepath: str | list[str], who: str | None = None) -> bool:
         """向当前聊天窗口发送文件
@@ -141,7 +146,7 @@ class WeChat:
             if self.B_MsgList.GetFirstChildControl().GetRuntimeId() is None:
                 break
             BeforeFirst = self.B_MsgList.GetFirstChildControl().GetRuntimeId()
-            wheel_control(self.B_MsgList, wheel_range=[2900, 3000])
+            wheel_control(self.B_MsgList, wheel_range=[4900, 6000])
             if BeforeFirst == self.B_MsgList.GetFirstChildControl().GetRuntimeId():
                 NoMore += 1
                 if NoMore > 3:
@@ -151,10 +156,6 @@ class WeChat:
 
     def GetAllFriends(self, keywords: str | None = None) -> list:
         """获取所有好友列表
-        注：
-            1. 该方法运行时间取决于好友数量，约每秒6~8个好友的速度
-            2. 该方法未经过大量测试，可能存在未知问题，如有问题请微信群内反馈
-
         Args:
             keywords (str, optional): 搜索关键词，只返回包含关键词的好友列表
 
@@ -220,9 +221,6 @@ class WeChat:
         """
         pass
 
-    def ChatWith(self, who: str, timeout: int = 2) -> bool:
-        pass
-
     def SendMsg(
         self,
         msg: str,
@@ -280,3 +278,12 @@ class WeChat:
             .Name
         )
         return WeiXinId
+
+    def move_to_msglist(self):
+        """移动到消息列表"""
+        rect = self.B_MsgList.BoundingRectangle
+        width = rect.right - rect.left
+        height = rect.bottom - rect.top
+        center_x = int(rect.left) + width / 2
+        center_y = int(rect.top) + height / 2
+        pyautogui.moveTo(int(center_x), int(center_y))

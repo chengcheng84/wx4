@@ -209,7 +209,7 @@ def GetSender(control) -> str:
 
 
 def wheel_control(
-    control: uia.Control, times: int = 1, wheel_range: list[int] = [300, 400]
+    control: uia.Control, times: int = 5, wheel_range: list[int] = [300, 400]
 ) -> None:
     """滚轮控制
     Args:
@@ -225,7 +225,7 @@ def wheel_control(
                 int(wheel_range[0] / times), int(wheel_range[1] / times)
             )
         )
-        time.sleep(time_list[i])
+        time.sleep(time_list[i] / 20)
 
 
 # 按 Ctrl + Shift + P 打开命令面板，输入 settings 并选择 Preferences: Open Settings (UI)。然后搜索 IntelliSense
