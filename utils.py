@@ -3,23 +3,19 @@ import re
 import random
 import time
 
+from loguru import Logger
 import pyperclip
 import pyautogui
 import uiautomation as uia
+from PIL import Image, UnidentifiedImageError
 
-from PIL import Image, ImageFile, UnidentifiedImageError
-from dotenv import load_dotenv
 from utils import get_logger
 
-if load_dotenv(dotenv_path=".env") is False:
-    print("Error to load")
-    exit(0x0001)
-load_dotenv(dotenv_path=".env")
 
-logger = get_logger()
+logger: Logger = get_logger()
 
 
-def voice_msg_processor(msg_content) -> None | dict[str, str | int]:
+def voice_msg_processor(msg_content) -> None | dict:
     """处理音频消息
     Args:
         msg_content(str):消息的内容
@@ -31,7 +27,7 @@ def voice_msg_processor(msg_content) -> None | dict[str, str | int]:
         if (match.group(1) is None) or (match.group(2) is None):
             return None
         else:
-            return {"time": match.group(1), "msg": match.group(2)}
+            return {"time": match.group(1), "msg": int(match.group(2))}
     else:
         return None
 
@@ -54,9 +50,9 @@ class MSG:
         if not auto_process_voice_msg:
             return
         voice_msg = voice_msg_processor(self.content)
-        if voice_msg_processor(self.content) is not None:
-            self.time: int = voice_msg["time"]
-            self.content: str = voice_msg["content"]
+        if voice_msg is not None:  # 避免重复调用
+            self.time: int = int(voice_msg["time"])
+            self.content: str = str(voice_msg["content"])
 
     def __str__(self):
         return f"MSG(index={self.index}, sender={self.sender}, content={self.content})"
@@ -165,11 +161,11 @@ def image_contains_color(image_path, tolerance=0) -> bool:
     :return: 如果图片中包含目标颜色，返回True，否则返回False
     """
     try:
-        image: ImageFile = Image.open(image_path)
+        image = Image.open(image_path)
     except UnidentifiedImageError as e:
         logger.error(e)
         return False
-    image: ImageFile = image.convert("RGB")
+    image = image.convert("RGB")
     width, height = image.size
     count: int = 0
     for x in range(width):
@@ -189,10 +185,10 @@ def image_contains_color(image_path, tolerance=0) -> bool:
 def GetSender(control) -> str:
     save_path = f"wxdata\\cache\\{str(control.GetRuntimeId())}.png"
     if (
-        (control.Name != "图片")  # 是图片
+        (control.Name != "图片")  # 不是图片
         and (str(control.AutomationId) != "")  # 不是时间
         and (is_fully_visible(control))  # 控件完全可见
-        and (control.Name != "文件")  # 是文件
+        and (control.Name != "文件")  # 不是文件
     ):
         if not os.path.exists(save_path):
             screenshot = capture_control_image(control)
@@ -217,6 +213,9 @@ def wheel_control(
         times(int):滚动的分的次数
         wheel_range(list):随机范围，例如[300, 400]
     """
+    if times <= 0:  # 避免除零错误
+        logger.warning("times 参数必须大于 0")
+        return
     time_list = [random.random() for _ in range(times)]
     control.SetFocus()
     for i in range(times):
@@ -228,6 +227,5 @@ def wheel_control(
         time.sleep(time_list[i] / 20)
 
 
-# 按 Ctrl + Shift + P 打开命令面板，输入 settings 并选择 Preferences: Open Settings (UI)。然后搜索 IntelliSense
 if __name__ == "__main__":
     print(merge_lists([1, 2], [1, 2]))

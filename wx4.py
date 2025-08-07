@@ -1,19 +1,14 @@
 import time
 import random
 from pathlib import Path
+from typing import Optional
 
 import uiautomation as uia
-from dotenv import load_dotenv
 import pyautogui
 
 from utils.utils import get_logger
 from .utils import *
 # from wx.anti_detection import anti_detection_start
-
-
-if load_dotenv(dotenv_path=".env") is None:
-    print("Error to load env")
-    exit(1)
 
 
 class WeChat:
@@ -42,7 +37,7 @@ class WeChat:
         self.possible_fastest_message_sending_speed = 0.5
         self.MsgEditorBox = self.WXwindow.EditControl(AutomationId="chat_input_field")
         self.SaveTo = 0
-        self.TheLastRuntimeID = None
+        self.TheLastRuntimeID: Optional[str] = None
         if chat_with is not None:
             print(self.ChatWith(chat_with))
         if init_msglist:
@@ -101,8 +96,11 @@ class WeChat:
         # 按顺序的RuntimeId列表
         NoMore: int = 0
         while True:
-            BeforeFirst = Msg.GetFirstChildControl().GetRuntimeId()
-            if BeforeFirst == Msg.GetFirstChildControl().GetRuntimeId():
+            first_child = Msg.GetFirstChildControl()
+            BeforeFirst = first_child.GetRuntimeId() if first_child else None
+            current_first = Msg.GetFirstChildControl()
+            current_first_id = current_first.GetRuntimeId() if current_first else None
+            if BeforeFirst == current_first_id:
                 NoMore += 1
                 if NoMore > 10:  # 确保没有更多消息
                     break
@@ -124,7 +122,9 @@ class WeChat:
             wheel_control(Msg, wheel_range=[-1500, -1000])
             if len(self.Runtimes_Msg) > self.SaveTo + 4:
                 self.UpdataMsgList()
-        self.TheLastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
+        last_child = self.B_MsgList.GetLastChildControl()
+        if last_child is not None:
+            self.TheLastRuntimeID = last_child.GetRuntimeId()
 
     def UpdataMsgList(self) -> None:
         # 将Runtimes_Msg中的消息整理为ALlMsgList，并清空Runtimes_Msg
@@ -145,18 +145,21 @@ class WeChat:
     def LoadMoreMessage(self) -> None:
         NoMore = 0
         while True:
-            if self.B_MsgList.GetFirstChildControl().GetRuntimeId() is None:
+            first_child = self.B_MsgList.GetFirstChildControl()
+            if first_child is None or first_child.GetRuntimeId() is None:
                 break
-            BeforeFirst = self.B_MsgList.GetFirstChildControl().GetRuntimeId()
+            BeforeFirst = first_child.GetRuntimeId()
             wheel_control(self.B_MsgList, wheel_range=[4900, 6000])
-            if BeforeFirst == self.B_MsgList.GetFirstChildControl().GetRuntimeId():
+            current_first = self.B_MsgList.GetFirstChildControl()
+            current_first_id = current_first.GetRuntimeId() if current_first else None
+            if BeforeFirst == current_first_id:
                 NoMore += 1
                 if NoMore > 3:
                     break
             else:
                 NoMore = 0
 
-    def GetAllFriends(self, keywords: str | None = None) -> list:
+    def GetAllFriends(self, keywords: str | None = None) -> NotImplementedError:
         """获取所有好友列表
         Args:
             keywords (str, optional): 搜索关键词，只返回包含关键词的好友列表
@@ -168,10 +171,11 @@ class WeChat:
 
     def get_new_message(self) -> None:
         # 监听新消息
-        LastRuntimeID = self.B_MsgList.GetLastChildControl().GetRuntimeId()
-        if LastRuntimeID != self.TheLastRuntimeID:
+        last_child = self.B_MsgList.GetLastChildControl()
+        LastRuntimeID = last_child.GetRuntimeId() if last_child else None
+        if LastRuntimeID is not None and LastRuntimeID != self.TheLastRuntimeID:
             self.Runtimes_Msg.append(LastRuntimeID)
-            control = self.B_MsgList.GetLastChildControl()
+            control: uia.Control = last_child  # type: ignore
             sender: str = GetSender(control)
 
             self.RuntimeID2Data[str(control.GetRuntimeId())] = [
@@ -196,11 +200,11 @@ class WeChat:
         self.WXwindow.SendKeys("{Ctrl}{Alt}w")
         self._show()
 
-    def CheckNewMessage(self) -> bool:
+    def CheckNewMessage(self):
         """是否有新消息"""
         pass
 
-    def DownloadImage(self, imcontrol: uia.ImageControl) -> str:
+    def DownloadImage(self, imcontrol: uia.ImageControl):
         """
         Args:
             imcontrol (uia.ImageControl): 图片控件
@@ -208,10 +212,9 @@ class WeChat:
         Returns:
             imgpath (str): 图片路径
         """
-        impath = self._download_file(imcontrol)
-        return impath if impath else "无法保存图片"
+        raise NotImplementedError("DownloadImage无法使用")
 
-    def GetSessionList(self, reset: bool = False, newmessage: bool = False) -> dict:
+    def GetSessionList(self, reset: bool = False, newmessage: bool = False):
         """获取当前聊天列表中的所有聊天对象
 
         Args:
@@ -221,7 +224,7 @@ class WeChat:
         Returns:
             SessionList (dict): 聊天对象列表，键为聊天对象名，值为新消息条数
         """
-        pass
+        raise NotImplementedError("GetSessionList无法使用")
 
     def SendMsg(
         self,
@@ -288,4 +291,4 @@ class WeChat:
         height = rect.bottom - rect.top
         center_x = int(rect.left) + width / 2
         center_y = int(rect.top) + height / 2
-        pyautogui.moveTo(int(center_x), int(center_y))
+        pyautogui.moveTo(int(center_x), int(center_y), duration=1 + random.random())
