@@ -6,8 +6,8 @@ from typing import Optional
 import uiautomation as uia
 import pyautogui
 
-from utils.utils import get_logger
 from .utils import *
+
 # from wx.anti_detection import anti_detection_start
 
 

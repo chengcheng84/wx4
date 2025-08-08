@@ -3,16 +3,30 @@ import re
 import random
 import time
 
-from loguru import Logger
 import pyperclip
 import pyautogui
 import uiautomation as uia
 from PIL import Image, UnidentifiedImageError
+from loguru import logger
+from dotenv import load_dotenv
 
-from utils import get_logger
+
+def get_logger():
+    logger.remove()
+    load_dotenv()
+    if os.getenv("Logs") is None:
+        raise RuntimeError("Error to get log path")
+    else:
+        if not os.path.exists(str(os.getenv("Logs"))):
+            raise RuntimeError(
+                f"Log file doesn't exists, Config file path:{os.getenv('Logs')}"
+            )
+        else:
+            logger.add(str(os.getenv("Logs")))
+    return logger
 
 
-logger: Logger = get_logger()
+logger = get_logger()
 
 
 def voice_msg_processor(msg_content) -> None | dict:
