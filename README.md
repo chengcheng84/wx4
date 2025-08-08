@@ -15,17 +15,15 @@
 
 ### 前提条件
 
-- Python 3.12+
-- 微信桌面客户端4.x版本(不可以使用4.0.6+)
+- Python 3.13+
+- 微信桌面客户端4.x版本(不可以使用4.0.6+，包括4.0.6)
 - Windows操作系统
 
 ### 安装步骤
 
-1. 克隆或下载本项目到本地
-
-2. 安装所需依赖
+#### 使用pip(可能要使用官方源)
 ```bash
-pip install uiautomation pyperclip pyautogui pillow loguru
+pip install wx4
 ```
 
 3. 确保微信桌面客户端已安装并能正常登录
@@ -35,7 +33,7 @@ pip install uiautomation pyperclip pyautogui pillow loguru
 ### 初始化微信控制
 
 ```python
-from wx4 import WeChat
+from wx4.wx4 import WeChat
 
 # 创建微信控制实例
 wx = WeChat()
@@ -56,7 +54,11 @@ messages = wx.GetAllMessage()
 for msg in messages:
     print(f"发送者: {msg.sender}, 内容: {msg.content}")
 ```
-
+###
+```python
+# 更新消息(没有将无法获取)
+wx.get_new_message()
+```
 ### 主要类
 
 - `WeChat`: 微信控制的主类，提供各种微信操作的方法

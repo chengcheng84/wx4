@@ -1,2 +1,6 @@
 __pycache__/
 anti_detection.json
+build/
+dist/
+wx4.egg-info/
+.vscode/
