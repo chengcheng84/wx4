@@ -185,6 +185,8 @@ def image_contains_color(image_path, tolerance=0) -> bool:
     for x in range(width):
         for y in range(height):
             pixel_color = image.getpixel((x, y))
+            if not isinstance(pixel_color, tuple) or pixel_color is None:
+                continue  # 跳过不是元组的像素
             diff = sum(
                 abs(a - b) for a, b in zip(pixel_color, (149, 236, 105))
             )  # 计算当前颜色与目标颜色之间的差值
