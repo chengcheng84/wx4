@@ -7,11 +7,12 @@ import pyperclip
 import pyautogui
 import uiautomation as uia
 from PIL import Image, UnidentifiedImageError
-from loguru import logger
 from dotenv import load_dotenv
 
 
 def get_logger():
+    from loguru import logger
+
     logger.remove()
     load_dotenv()
     if os.getenv("Logs") is None:
@@ -29,19 +30,19 @@ def get_logger():
 logger = get_logger()
 
 
-def voice_msg_processor(msg_content) -> None | dict:
+def voice_msg_processor(msg_content: str) -> None | dict:
     """处理音频消息
     Args:
         msg_content(str):消息的内容
     """
     msg = msg_content
-    pattern = r'"语言(\d+)"秒(.*)'
+    pattern = r'语音(\d+)"秒(.*)'
     match = re.search(pattern, msg)
     if match:
         if (match.group(1) is None) or (match.group(2) is None):
             return None
         else:
-            return {"time": match.group(1), "msg": int(match.group(2))}
+            return {"time": match.group(1), "msg": str(match.group(2))}
     else:
         return None
 
@@ -66,7 +67,7 @@ class MSG:
         voice_msg = voice_msg_processor(self.content)
         if voice_msg is not None:  # 避免重复调用
             self.time: int = int(voice_msg["time"])
-            self.content: str = str(voice_msg["content"])
+            self.content: str = str(voice_msg["msg"])
 
     def __str__(self):
         return f"MSG(index={self.index}, sender={self.sender}, content={self.content})"
@@ -244,4 +245,9 @@ def wheel_control(
 
 
 if __name__ == "__main__":
-    print(merge_lists([1, 2], [1, 2]))
+    msg = MSG(
+        index=0,
+        sender="Other",
+        content='"语音8"秒在这边要先行进行转点，直接过来看一下变形树，没有碰到积木上面来变形到其他的选手，而另一边不成的位置传回了队友的身边。"',
+    )
+    print(msg.content)

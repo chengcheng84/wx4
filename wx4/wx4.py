@@ -292,3 +292,6 @@ class WeChat:
         center_x = int(rect.left) + width / 2
         center_y = int(rect.top) + height / 2
         pyautogui.moveTo(int(center_x), int(center_y), duration=1 + random.random())
+
+    def test(self):
+        print(is_fully_visible(self.B_MsgList[1]))
