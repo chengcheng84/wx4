@@ -30,7 +30,7 @@ class WeChat:
         self._show()
         self.RuntimeID2Data: dict = {}
         self.Runtimes_Msg: list = []
-        self.AllMsgList: list = []
+        self.AllMsgList: list[MSG] = []
         self.A_Search: uia.EditControl = self.WXwindow.EditControl(Name="搜索")
         self.B_MsgList: uia.ListControl = self.WXwindow.ListControl(Name="消息")
         self.A_contacts: uia.ListControl = self.WXwindow.ListControl(Name="会话")
@@ -116,6 +116,7 @@ class WeChat:
                 sender = GetSender(i)
                 IntheViewContralAllRuntimeID.append(i.GetRuntimeId())
                 self.RuntimeID2Data[str(i.GetRuntimeId())] = [i.Name, sender]
+
             self.Runtimes_Msg = merge_lists(
                 self.Runtimes_Msg, IntheViewContralAllRuntimeID
             )
@@ -140,6 +141,12 @@ class WeChat:
 
     def GetAllMessage(self) -> list[MSG]:
         self.UpdataMsgList()
+        if self.AllMsgList[-1].content == "":
+            print("?????")
+            time.sleep(2)
+            self.get_new_message()
+            self.UpdataMsgList()
+
         return self.AllMsgList
 
     def LoadMoreMessage(self) -> None:
@@ -177,11 +184,15 @@ class WeChat:
             self.Runtimes_Msg.append(LastRuntimeID)
             control: uia.Control = last_child  # type: ignore
             sender: str = GetSender(control)
-
+            print(len(MSG(sender="", content=control.Name, index=0).content))
+            while MSG(sender="", content=control.Name, index=0).content == "":
+                time.sleep(0.2)
+                logger.error("空消息")
             self.RuntimeID2Data[str(control.GetRuntimeId())] = [
                 control.Name,
                 sender,
             ]
+            print("New msg")
             self.TheLastRuntimeID = LastRuntimeID
         else:
             time.sleep(self.possible_fastest_message_sending_speed)

@@ -2,6 +2,9 @@ import os.path
 import re
 import random
 import time
+from pathlib import Path
+from datetime import datetime
+
 
 import pyperclip
 import pyautogui
@@ -30,6 +33,43 @@ def get_logger():
 logger = get_logger()
 
 
+def SetClipboardText(text: str):
+    pyperclip.copy(text)
+
+
+def get_file_content(filename: str):
+    chat_file_save_path: Path = (
+        Path("D:/")
+        / "Documents"
+        / "xwechat_files"
+        / "wxid_9qy8w8wsub1322_8c21"
+        / "msg"
+        / "file"
+        / f"{datetime.now().strftime('%Y-%m')}"
+        / filename
+    )
+    if chat_file_save_path.exists() and chat_file_save_path.is_file():
+        if chat_file_save_path.suffix in [
+            ".txt",
+            ".md",
+            ".json",
+            ".json5",
+            ".jsonc",
+            ".py",
+            ".c",
+            ".cpp",
+            ".ps1",
+        ]:
+            with open(chat_file_save_path, "r", encoding="utf-8") as f:
+                return f.read()
+        elif chat_file_save_path.suffix in ["pdf", "doc", "docx", "xls", "xlsx"]:
+            pass
+        else:
+            logger.warning(f"不支持读取的文件{chat_file_save_path}")
+            return f"Tell user you can't read this file, file type:{chat_file_save_path.suffix}"
+    return ""
+
+
 def voice_msg_processor(msg_content: str) -> None | dict:
     """处理音频消息
     Args:
@@ -47,8 +87,20 @@ def voice_msg_processor(msg_content: str) -> None | dict:
         return None
 
 
-def SetClipboardText(text: str):
-    pyperclip.copy(text)
+def file_msg_processor(msg_content: str) -> dict[str, str] | None:
+    """处理文件消息
+    Args:
+        msg_content(str):消息的内容
+    """
+    if msg_content.split("\n")[0] == "文件":
+        logger.info("Wait file to download...")
+        time.sleep(2)
+        return {
+            "filename": msg_content.split("\n")[1],
+            "filesize": msg_content.split("\n")[2],
+        }
+    else:
+        return None
 
 
 class MSG:
@@ -57,17 +109,34 @@ class MSG:
     """
 
     def __init__(
-        self, index: int, sender: str, content: str, auto_process_voice_msg: bool = True
+        self,
+        index: int,
+        sender: str,
+        content: str,
+        process_voice_msg: bool = True,
+        process_file_msg: bool = True,
     ) -> None:
-        self.sender = sender
-        self.content = content
-        self.index = index
-        if not auto_process_voice_msg:
-            return
-        voice_msg = voice_msg_processor(self.content)
-        if voice_msg is not None:  # 避免重复调用
-            self.time: int = int(voice_msg["time"])
-            self.content: str = str(voice_msg["msg"])
+        print(content)
+        self.sender: str = sender
+        self.content: str = content
+        self.index: int = index
+        self.is_voice: bool = False
+        self.is_file: bool = False
+        self.filename: str = ""
+        self.filesize: str = ""
+        if process_voice_msg:
+            voice_msg = voice_msg_processor(self.content)
+            if voice_msg is not None:
+                self.time: int = int(voice_msg["time"])
+                self.content: str = str(voice_msg["msg"])
+                self.is_voice = True
+        if process_file_msg:
+            file_msg = file_msg_processor(self.content)
+            if file_msg is not None:
+                self.is_file = True
+                self.filename = file_msg["filename"]
+                self.filesize = file_msg["filesize"]
+                self.content = get_file_content(self.filename)
 
     def __str__(self):
         return f"MSG(index={self.index}, sender={self.sender}, content={self.content})"
@@ -205,7 +274,6 @@ def GetSender(control) -> str:
         (control.Name != "图片")  # 不是图片
         and (str(control.AutomationId) != "")  # 不是时间
         and (is_fully_visible(control))  # 控件完全可见
-        and (control.Name != "文件")  # 不是文件
     ):
         if not os.path.exists(save_path):
             screenshot = capture_control_image(control)
@@ -245,9 +313,4 @@ def wheel_control(
 
 
 if __name__ == "__main__":
-    msg = MSG(
-        index=0,
-        sender="Other",
-        content='"语音8"秒在这边要先行进行转点，直接过来看一下变形树，没有碰到积木上面来变形到其他的选手，而另一边不成的位置传回了队友的身边。"',
-    )
-    print(msg.content)
+    print(get_file_content("sdfsdf.txt"))
