@@ -125,7 +125,7 @@ class WeChat:
                 self.UpdataMsgList()
         last_child = self.B_MsgList.GetLastChildControl()
         if last_child is not None:
-            self.TheLastRuntimeID = last_child.GetRuntimeId()
+            self.TheLastRuntimeID = str(last_child.GetRuntimeId())
 
     def UpdataMsgList(self) -> None:
         # 将Runtimes_Msg中的消息整理为ALlMsgList，并清空Runtimes_Msg
@@ -303,6 +303,3 @@ class WeChat:
         center_x = int(rect.left) + width / 2
         center_y = int(rect.top) + height / 2
         pyautogui.moveTo(int(center_x), int(center_y), duration=1 + random.random())
-
-    def test(self):
-        print(is_fully_visible(self.B_MsgList[1]))
