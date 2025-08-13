@@ -54,7 +54,6 @@ class WeChat:
             contact_name:联系人的名字
         """
         for i, contact in enumerate(self.A_contacts.GetChildren()):
-            print(str(contact.Name).split(" "), contact_name)
             if str(contact.Name).split(" ")[0] == contact_name:
                 contact.Click()
                 return (contact.Name, i)
@@ -141,12 +140,6 @@ class WeChat:
 
     def GetAllMessage(self) -> list[MSG]:
         self.UpdataMsgList()
-        if self.AllMsgList[-1].content == "":
-            print("?????")
-            time.sleep(2)
-            self.get_new_message()
-            self.UpdataMsgList()
-
         return self.AllMsgList
 
     def LoadMoreMessage(self) -> None:
@@ -184,7 +177,6 @@ class WeChat:
             self.Runtimes_Msg.append(LastRuntimeID)
             control: uia.Control = last_child  # type: ignore
             sender: str = GetSender(control)
-            print(len(MSG(sender="", content=control.Name, index=0).content))
             while MSG(sender="", content=control.Name, index=0).content == "":
                 time.sleep(0.2)
                 logger.error("空消息")
@@ -192,7 +184,6 @@ class WeChat:
                 control.Name,
                 sender,
             ]
-            print("New msg")
             self.TheLastRuntimeID = LastRuntimeID
         else:
             time.sleep(self.possible_fastest_message_sending_speed)

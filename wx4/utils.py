@@ -116,7 +116,6 @@ class MSG:
         process_voice_msg: bool = True,
         process_file_msg: bool = True,
     ) -> None:
-        print(content)
         self.sender: str = sender
         self.content: str = content
         self.index: int = index
