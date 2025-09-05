@@ -5,7 +5,6 @@ from typing import Optional
 
 import uiautomation as uia
 import pyautogui
-
 from .utils import *
 
 # from wx.anti_detection import anti_detection_start
@@ -26,7 +25,6 @@ class WeChat:
         for file in CacheFolder.iterdir():
             if file.is_file():
                 file.unlink()
-
         self._show()
         self.RuntimeID2Data: dict = {}
         self.Runtimes_Msg: list = []
@@ -81,8 +79,6 @@ class WeChat:
 
     def InitGetAllMessage(self) -> None:
         """
-        # To Fix
-        获取所有消息的时候,RuntimeID可能重复，导致错误
         ## 方法
         1. 获取所有消息的RuntimeID（OK）
         2. 在每4个控件就生成MSG对象防止RuntimeID重复
