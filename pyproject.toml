@@ -1,0 +1,19 @@
+[project]
+name = "wx4"
+version = "0.1.1"
+description = "A WeChat control whell with automation"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "loguru>=0.7.3",
+    "pillow>=11.1.0",
+    "pyautogui>=0.9.54",
+    "pyperclip>=1.9.0",
+    "uiautomation>=2.0.28",
+]
+[tool.setuptools]
+packages = ["wx4"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
