@@ -1,3 +1,5 @@
+
+
 # 微信自动化工具（必须使用微信4.0.5）
 
 这是一个基于Python的微信桌面客户端自动化工具，使用uiautomation库实现对微信4.x界面的控制，可以帮助用户自动化执行微信的各种操作。
@@ -25,7 +27,7 @@
 
 2. 安装所需依赖
 ```bash
-pip install uiautomation pyperclip pyautogui pillow loguru
+pip install uiautomation pyperclip pyautogui pillow loguru python-dotenv
 ```
 
 3. 确保微信桌面客户端已安装并能正常登录
